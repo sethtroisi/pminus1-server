@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>
+<style>
+#results tbody:first-of-type tr:first-child {
+  background-color: #dee2e6
+}
+
+#results-tabs .tab-content {
+  padding : 10px 0px;
+}
+
+#results-tabs .nav-pills > li > a {
+  border-radius: 0;
+}
+
+#main-col {
+  max-width: 80%;
+}
+
+#main-col .table {
+  width: auto;
+}
+
+@media (min-width: 1400px) {
+  #main-col {
+    max-width: 70%;
+  }
+}
+
+</style>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.js"></script>
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+{% set base="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0" %}
+<link rel="stylesheet" href="{{base}}/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="{{base}}/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+</head>
+
+{% macro number_comma_or_na(n) -%}
+  {{ "{:,}".format(n) if n else "N/A" }}
+{%- endmacro %}
+
+{% macro status_row(name, data) %}
+    <tr>
+      <th>
+        {# TODO Make this a download link #}
+        {{ name }}
+      </th>
+      <th>
+        {{ data["number_str"] }}
+      </th>
+      <td>TBD</td>
+      <td>{{ number_comma_or_na(data.get("B1_progress")) }}</td>
+      <td>{{ number_comma_or_na(data.get("B2_progress")) }}</td>
+      <td>TBD</td>
+      <td>TBD</td>
+      <td>{{ data }}</td>
+    </tr>
+{% endmacro %}
+
+{% macro status_table(label, rows) -%}
+<table id="results" class="table table-sm table-hover w-auto">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col" class="col-auto">Filename</th>
+      <th scope="col" class="col-auto">Exponent</th>
+      <th scope="col" class="col-auto">Factors</th>
+      <th scope="col" class="col-auto">B1</th>
+      <th scope="col" class="col-auto">B2</th>
+      <th scope="col" class="col-auto">GHz-Day</th>
+      <th scope="col" class="col-auto">Updated</th>
+      <th scope="col" class="col-auto">Data</th>
+    </tr>
+  </thead>
+  {% for name, data in rows.items() %}
+  <tbody>
+    {{ status_row(name, data) }}
+  </tbody>
+  {% endfor %}
+</table>
+{%- endmacro %}
+
+<body>
+  <div id='main-col' class="container">
+    <h1 class="text-center">Mersenne P-1 Repository</h1>
+    <br>
+
+    <div>
+      <div class="d-flex justify-content-center">
+        <table id="head-stats" class="table table-sm table-hover w-auto">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col" class="col-auto">Total Exponents</th>
+              <th scope="col" class="col-auto">B1</th>
+              <th scope="col" class="col-auto">B2</th>
+              <th scope="col" class="col-auto">Updates</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{total_exponents}}</td>
+              <td>B1: {{ B1_range[0] }} to {{ B1_range[1] }}</td>
+              <td>B2: {{ B2_range[0] }} to {{ B2_range[1] }}</td>
+              <td>TDB</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-center">
+        {{ status_table( "All", status ) }}
+      </div>
+    </div>
+  </div>
+</body>

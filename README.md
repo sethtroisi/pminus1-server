@@ -9,9 +9,13 @@ pip install -r requirements.txt
 git clone https://github.com/sethtroisi/pminus1-server
 cd pminus1-server
 
+# git submodule later
+# wget for people who aren't me
+ln -s ../../misc-scripts/mersenne/status_report/prime95_status.py .
+
 # Download P-1 files from ???
 
-python app.py
+FLASK_APP=app.py FLASK_ENV=development flask run
 ```
 
 A local server should now be running at http://localhost:5090
