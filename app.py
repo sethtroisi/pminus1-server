@@ -19,7 +19,7 @@ import json
 import os
 
 from flask import Flask
-from flask import Response, render_template
+from flask import Response, render_template, send_from_directory
 from flask_caching import Cache
 
 import prime95_status
@@ -30,8 +30,8 @@ app = Flask(__name__)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 
-# Result of prime95_status.py <SERVE_DIR> --json status.json
-SERVE_DIR = "/home/five/Downloads/GIMPS/p95_partials/7_to_20K/"
+# Result of prime95_status.py <SERVE_DIR> --json status.json --recursive
+SERVE_DIR = "/home/five/Downloads/GIMPS/p95_partials/"
 STATUS_FN = "status.json"
 
 # TODO TF, P-1 data from mersenne.ca/export
@@ -50,11 +50,23 @@ def get_status():
         return json.load(status_file)
 
 
-@app.route("/")
-def controller():
+@app.route('/download/<filename>')
+def download(filename):
+    # Fine because get_status is cached
     status = get_status()
 
-    for name in status:
+    if filename not in status:
+        return f"{filename} not found", 404
+
+    rel_path = status[filename]["path"]
+    print(SERVE_DIR, rel_path)
+    return send_from_directory(directory=SERVE_DIR, filename=rel_path)
+
+@app.route("/")
+def main_page():
+    status = get_status()
+
+    for name in list(status):
         wu = status[name]
         work = wu.pop('work_type')
         if work != 'PM1':
@@ -66,6 +78,7 @@ def controller():
         # These just busy up data
         wu.pop("B1_bound", None)
         wu.pop("B2_bound", None)
+        wu.pop("path")
 
 
     exponents = set()

@@ -22,8 +22,9 @@ A local server should now be running at http://localhost:5090
 
 ### TODO
 
-* [ ] View records
-* [ ] Download files
+* [x] View records
+  * [ ] Allow sorting
+* [x] Download files
 * [ ] Upload files
 * [ ] Reserve work
 * [ ] Sorted list of "best" work to do

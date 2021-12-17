@@ -55,8 +55,7 @@
   {% set n_str = d.pop("number_str") %}
     <tr>
       <th class="pr-4">
-        {# TODO Make this a download link #}
-        {{ name }}
+        <a href="{{ url_for("download", filename=name) }}">{{ name }}</a>
       </th>
       <th class="pr-3">
         {{ mersenne_ca_link(n, n_str) if raw['k'] == 1 and raw['c'] == -1 else n_str }}
