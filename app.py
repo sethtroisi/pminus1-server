@@ -54,9 +54,18 @@ def get_status():
 def controller():
     status = get_status()
 
-    for name, wu in status.items():
+    for name in status:
+        wu = status[name]
+        work = wu.pop('work_type')
+        if work != 'PM1':
+            status.pop(name)
+            continue
+
         wu["number_str"] = prime95_status.number_str(wu)
-        wu.pop("raw", None)
+
+        # These just busy up data
+        wu.pop("B1_bound", None)
+        wu.pop("B2_bound", None)
 
 
     exponents = set()

@@ -43,21 +43,30 @@
   {{ "{:,}".format(n) if n else "N/A" }}
 {%- endmacro %}
 
+{% macro mersenne_ca_link(n, text) -%}
+  <a href="//mersenne.ca/exponent/{{n}}">{{ text }}</a>
+{%- endmacro %}
+
 {% macro status_row(name, data) %}
+  {# copy so we can pop number_str #}
+  {% set d = dict(data) %}
+  {% set raw = d.pop("raw") %}
+  {% set n = d.pop("n") %}
+  {% set n_str = d.pop("number_str") %}
     <tr>
-      <th>
+      <th class="pr-4">
         {# TODO Make this a download link #}
         {{ name }}
       </th>
-      <th>
-        {{ data["number_str"] }}
+      <th class="pr-3">
+        {{ mersenne_ca_link(n, n_str) if raw['k'] == 1 and raw['c'] == -1 else n_str }}
       </th>
       <td>TBD</td>
-      <td>{{ number_comma_or_na(data.get("B1_progress")) }}</td>
-      <td>{{ number_comma_or_na(data.get("B2_progress")) }}</td>
+      <td>{{ number_comma_or_na(d.pop("B1_progress", None)) }}</td>
+      <td>{{ number_comma_or_na(d.pop("B2_progress", None)) }}</td>
       <td>TBD</td>
       <td>TBD</td>
-      <td>{{ data }}</td>
+      <td>{{ d }}</td>
     </tr>
 {% endmacro %}
 
@@ -65,14 +74,14 @@
 <table id="results" class="table table-sm table-hover w-auto">
   <thead class="thead-dark">
     <tr>
-      <th scope="col" class="col-auto">Filename</th>
-      <th scope="col" class="col-auto">Exponent</th>
-      <th scope="col" class="col-auto">Factors</th>
-      <th scope="col" class="col-auto">B1</th>
-      <th scope="col" class="col-auto">B2</th>
-      <th scope="col" class="col-auto">GHz-Day</th>
-      <th scope="col" class="col-auto">Updated</th>
-      <th scope="col" class="col-auto">Data</th>
+      <th scope="col">Filename</th>
+      <th scope="col">Exponent</th>
+      <th scope="col">Factors</th>
+      <th scope="col">B1</th>
+      <th scope="col">B2</th>
+      <th scope="col">GHz-Day</th>
+      <th scope="col">Updated</th>
+      <th scope="col">Data</th>
     </tr>
   </thead>
   {% for name, data in rows.items() %}
@@ -90,20 +99,20 @@
 
     <div>
       <div class="d-flex justify-content-center">
-        <table id="head-stats" class="table table-sm table-hover w-auto">
+        <table id="head-stats" class="table table-sm table-hover">
           <thead class="thead-dark">
             <tr>
-              <th scope="col" class="col-auto">Total Exponents</th>
-              <th scope="col" class="col-auto">B1</th>
-              <th scope="col" class="col-auto">B2</th>
-              <th scope="col" class="col-auto">Updates</th>
+              <th scope="col">Total Exponents</th>
+              <th scope="col">B1</th>
+              <th scope="col">B2</th>
+              <th scope="col">Updates</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>{{total_exponents}}</td>
-              <td>B1: {{ B1_range[0] }} to {{ B1_range[1] }}</td>
-              <td>B2: {{ B2_range[0] }} to {{ B2_range[1] }}</td>
+              <td class="pr-4">{{ "{:.1e}".format(B1_range[0]).replace("+0", "") }} to {{ "{:.1e}".format(B1_range[1]).replace("+0", "") }}
+              <td class="pr-4">{{ "{:.1e}".format(B2_range[0]).replace("+0", "") }} to {{ "{:.1e}".format(B2_range[1]).replace("+", "") }}
               <td>TDB</td>
             </tr>
           </tbody>
