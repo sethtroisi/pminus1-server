@@ -1,43 +1,37 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<head>
-<style>
-#results tbody:first-of-type tr:first-child {
-  background-color: #dee2e6
-}
+<html>
+  <meta charset="utf-8">
+  <head>
+  <style>
 
-#results-tabs .tab-content {
-  padding : 10px 0px;
-}
-
-#results-tabs .nav-pills > li > a {
-  border-radius: 0;
-}
-
-#main-col {
-  max-width: 80%;
-}
-
-#main-col .table {
-  width: auto;
-}
-
-@media (min-width: 1400px) {
   #main-col {
-    max-width: 70%;
+    max-width: 90%;
   }
-}
 
-</style>
+  #main-col .table {
+    width: auto;
+  }
+
+  @media (min-width: 1400px) {
+    #main-col {
+      max-width: 85%;
+    }
+  }
+
+  </style>
 
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.js"></script>
-<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
-{% set base="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0" %}
-<link rel="stylesheet" href="{{base}}/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-<script src="{{base}}/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.js"></script>
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+  {% set base="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0" %}
+  <link rel="stylesheet" href="{{base}}/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <script src="{{base}}/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
-</head>
+  {# See https://datatables.net/download/ #}
+  <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.11.3/datatables.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.11.3/datatables.min.css"/>
+
+  </head>
 
 {% macro number_comma_or_na(n) -%}
   {{ "{:,}".format(n) if n else "N/A" }}
@@ -53,41 +47,43 @@
   {% set raw = d.pop("raw") %}
   {% set n = d.pop("n") %}
   {% set n_str = d.pop("number_str") %}
+  {% set B1 = d.pop("B1_progress", 0) %}
+  {% set B2 = d.pop("B2_progress", 0) %}
     <tr>
-      <th class="pr-4">
+      <th class="pr-4" data-order="{{n}}">
         <a href="{{ url_for("download", filename=name) }}">{{ name }}</a>
       </th>
-      <th class="pr-3">
+      <th class="pr-3" data-order="{{n}}">
         {{ mersenne_ca_link(n, n_str) if raw['k'] == 1 and raw['c'] == -1 else n_str }}
       </th>
       <td>TBD</td>
-      <td>{{ number_comma_or_na(d.pop("B1_progress", None)) }}</td>
-      <td>{{ number_comma_or_na(d.pop("B2_progress", None)) }}</td>
-      <td>TBD</td>
-      <td>TBD</td>
+      <td data-order="{{B1}}">{{ number_comma_or_na(B1) }}</td>
+      <td data-order="{{B2}}">{{ number_comma_or_na(B2) }}</td>
+      <td class="px-5">TBD</td>
+      <td class="px-5">TBD</td>
       <td>{{ d }}</td>
     </tr>
 {% endmacro %}
 
 {% macro status_table(label, rows) -%}
-<table id="results" class="table table-sm table-hover w-auto">
-  <thead class="thead-dark">
+<table id="status" class="table table-sm table-hover w-auto">
+  <thead class="thead-light">
     <tr>
       <th scope="col">Filename</th>
-      <th scope="col">Exponent</th>
+      <th scope="col sorting">Exponent</th>
       <th scope="col">Factors</th>
-      <th scope="col">B1</th>
-      <th scope="col">B2</th>
-      <th scope="col">GHz-Day</th>
-      <th scope="col">Updated</th>
+      <th scope="col sorting">B1</th>
+      <th scope="col sorting">B2</th>
+      <th scope="col sorting">GHz&ndash;Day</th>
+      <th scope="col sorting">Updated</th>
       <th scope="col">Data</th>
     </tr>
   </thead>
-  {% for name, data in rows.items() %}
   <tbody>
+  {% for name, data in rows.items() %}
     {{ status_row(name, data) }}
-  </tbody>
   {% endfor %}
+  </tbody>
 </table>
 {%- endmacro %}
 
@@ -99,7 +95,7 @@
     <div>
       <div class="d-flex justify-content-center">
         <table id="head-stats" class="table table-sm table-hover">
-          <thead class="thead-dark">
+          <thead class="thead-light">
             <tr>
               <th scope="col">Total Exponents</th>
               <th scope="col">B1</th>
@@ -124,3 +120,15 @@
     </div>
   </div>
 </body>
+
+<script type="text/javascript">
+  $(document).ready(function () {
+    $('#status').DataTable({
+      "searching": true,
+      "ordering": true,
+      "paging": false,
+    });
+    $('.dataTables_length').addClass('bs-select');
+  });
+</script>
+</html>
