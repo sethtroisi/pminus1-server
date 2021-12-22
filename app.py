@@ -39,6 +39,30 @@ STATUS_FN = "status.json"
 MAX_N = 10 ** 6
 
 
+def add_factors(wu):
+    """ Lookup number of factors of n"""
+    # TODO
+    wu["factors"] = 0
+
+def add_tags(wu):
+    """ Add list of [(tag1, style1), (tag2, style2)]"""
+    tags = []
+
+    n = wu["n"]
+    for under in [10, 100, 200]:
+        if n <= under * 1000:
+            tags.append((f"Under {under}k", "secondary"))
+            break
+
+    if wu["factors"] == 0:
+        tags.append((f"NF", "warning"))
+
+    if wu["factors"] > 5:
+        tags.append(("MF", "info"))
+
+    wu["tags"] = tags
+
+
 # NOTE: status file is small (XXX kb) but avoid loading it on each request.
 @cache.cached(timeout=5 * 60)
 def get_status():
@@ -61,6 +85,7 @@ def download(filename):
     rel_path = status[filename]["path"]
     print(SERVE_DIR, rel_path)
     return send_from_directory(directory=SERVE_DIR, filename=rel_path)
+
 
 @app.route("/")
 def main_page():
@@ -85,6 +110,9 @@ def main_page():
     B1 = []
     B2 = []
     for wu in status.values():
+        add_factors(wu)
+        add_tags(wu)
+
         exponents.add(wu["number_str"])
         b1 = wu.get("B1_progress", None)
         if b1:
@@ -92,6 +120,7 @@ def main_page():
             b2 = wu.get("B2_progress", None)
             if b2:
                 B2.append(b2)
+
 
 
     return render_template(

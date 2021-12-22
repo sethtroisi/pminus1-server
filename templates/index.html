@@ -18,6 +18,12 @@
     }
   }
 
+  @media (min-width: 1400px) {
+    #main-col {
+      max-width: 85%;
+    }
+  }
+
   </style>
 
 
@@ -41,19 +47,21 @@
   <a href="//mersenne.ca/exponent/{{n}}">{{ text }}</a>
 {%- endmacro %}
 
-{% macro status_row(name, data) %}
+{%- macro status_row(name, data) -%}
   {# copy so we can pop number_str #}
-  {% set d = dict(data) %}
-  {% set raw = d.pop("raw") %}
-  {% set n = d.pop("n") %}
-  {% set n_str = d.pop("number_str") %}
-  {% set B1 = d.pop("B1_progress", 0) %}
-  {% set B2 = d.pop("B2_progress", 0) %}
+  {%- set d = dict(data) -%}
+  {%- set raw = d.pop("raw") -%}
+  {%- set n = d.pop("n") -%}
+  {%- set n_str = d.pop("number_str") -%}
+  {%- set factors = d.pop("factors", 0) -%}
+  {%- set B1 = d.pop("B1_progress", 0) -%}
+  {%- set B2 = d.pop("B2_progress", 0) -%}
+  {%- set tags = d.pop("tags", []) -%}
     <tr>
       <th class="pr-4" data-order="{{n}}">
         <a href="{{ url_for("download", filename=name) }}">{{ name }}</a>
       </th>
-      <th class="pr-3" data-order="{{n}}">
+      <th class="pr-4" data-order="{{n}}">
         {{ mersenne_ca_link(n, n_str) if raw['k'] == 1 and raw['c'] == -1 else n_str }}
       </th>
       <td>TBD</td>
@@ -61,28 +69,37 @@
       <td data-order="{{B2}}">{{ number_comma_or_na(B2) }}</td>
       <td class="px-5">TBD</td>
       <td class="px-5">TBD</td>
-      <td>{{ d }}</td>
+      <td class="px-2">{{ d }}</td>
+      <td class="px-2">
+      {%- for name, badge_type in tags -%}
+        <span class="badge badge-{{badge_type}}" data-toggle="tooltip" title="{{name}}">
+          {{name}}
+        </span>
+        {%- if not loop.islast -%}&nbsp;{%- endif -%}
+      {%- endfor -%}
+      </td>
     </tr>
-{% endmacro %}
+{%- endmacro -%}
 
 {% macro status_table(label, rows) -%}
-<table id="status" class="table table-sm table-hover w-auto">
+<table id="status" class="table table-sm table-hover">
   <thead class="thead-light">
     <tr>
       <th scope="col">Filename</th>
-      <th scope="col sorting">Exponent</th>
+      <th scope="col">Exponent</th>
       <th scope="col">Factors</th>
-      <th scope="col sorting">B1</th>
-      <th scope="col sorting">B2</th>
-      <th scope="col sorting">GHz&ndash;Day</th>
-      <th scope="col sorting">Updated</th>
+      <th scope="col">B1</th>
+      <th scope="col">B2</th>
+      <th scope="col">GHz&ndash;Day</th>
+      <th scope="col">Updated</th>
       <th scope="col">Data</th>
+      <th scope="col">Tags</th>
     </tr>
   </thead>
   <tbody>
-  {% for name, data in rows.items() %}
+  {%- for name, data in rows.items() -%}
     {{ status_row(name, data) }}
-  {% endfor %}
+  {%- endfor -%}
   </tbody>
 </table>
 {%- endmacro %}
@@ -122,13 +139,20 @@
 </body>
 
 <script type="text/javascript">
+  // /*
   $(document).ready(function () {
     $('#status').DataTable({
-      "searching": true,
-      "ordering": true,
-      "paging": false,
+      "aoColumnDefs": [
+        { "bSortable": false, "aTargets": [0, 7, 8] },
+        { "select": true, "aTargets": [8] },
+      ],
+      searching: true,
+      ordering: true,
+      pageLength: 25,
     });
     $('.dataTables_length').addClass('bs-select');
   });
+
+  // */
 </script>
 </html>
