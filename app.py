@@ -18,6 +18,8 @@ limitations under the License.
 import json
 import os
 
+from collections import defaultdict
+
 from flask import Flask
 from flask import Response, render_template, send_from_directory
 from flask_caching import Cache
@@ -32,17 +34,33 @@ cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 # Result of prime95_status.py <SERVE_DIR> --json status.json --recursive
 SERVE_DIR = "/home/five/Downloads/GIMPS/p95_partials/"
+FACTORS_FN = "mersenneca_known_factors_0G.txt"
 STATUS_FN = "status.json"
 
 # TODO TF, P-1 data from mersenne.ca/export
 
-MAX_N = 10 ** 6
+MAX_COLLECT_N = 10 ** 6
 
 
+def load_factor_count(STOP=1e7):
+    count = defaultdict(int)
+    with open(os.path.join(app.root_path, FACTORS_FN)) as f:
+        for line in f:
+            raw = line.split(",")
+            m = int(raw[0])
+            if m > STOP:
+                break
+            count[m] += 1
+
+    print(f"Loaded {sum(count.values())} factors for {len(count)} exponents")
+    return count
+
+
+factor_counts = load_factor_count()
 def add_factors(wu):
+    global factor_counts
     """ Lookup number of factors of n"""
-    # TODO
-    wu["factors"] = 0
+    wu["factors"] = factor_counts[wu["n"]]
 
 def add_tags(wu):
     """ Add list of [(tag1, style1), (tag2, style2)]"""

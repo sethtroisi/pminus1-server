@@ -40,7 +40,7 @@
   </head>
 
 {% macro number_comma_or_na(n) -%}
-  {{ "{:,}".format(n) if n else "N/A" }}
+{{ ("{:.1e}" if n > 1.1e11 else "{:,}").format(n) if n else "N/A" }}
 {%- endmacro %}
 
 {% macro mersenne_ca_link(n, text) -%}
@@ -64,10 +64,9 @@
       <th class="pr-4" data-order="{{n}}">
         {{ mersenne_ca_link(n, n_str) if raw['k'] == 1 and raw['c'] == -1 else n_str }}
       </th>
-      <td>TBD</td>
+      <td>{{ factors }}</td>
       <td data-order="{{B1}}">{{ number_comma_or_na(B1) }}</td>
       <td data-order="{{B2}}">{{ number_comma_or_na(B2) }}</td>
-      <td class="px-5">TBD</td>
       <td class="px-5">TBD</td>
       <td class="px-2">{{ d }}</td>
       <td class="px-2">
@@ -75,7 +74,7 @@
         <span class="badge badge-{{badge_type}}" data-toggle="tooltip" title="{{name}}">
           {{name}}
         </span>
-        {%- if not loop.islast -%}&nbsp;{%- endif -%}
+        {%- if not loop.last -%}&nbsp;{%- endif -%}
       {%- endfor -%}
       </td>
     </tr>
@@ -87,11 +86,10 @@
     <tr>
       <th scope="col">Filename</th>
       <th scope="col">Exponent</th>
-      <th scope="col">Factors</th>
+      <th scope="col">Factors&nbsp;</th>
       <th scope="col">B1</th>
       <th scope="col">B2</th>
       <th scope="col">GHz&ndash;Day</th>
-      <th scope="col">Updated</th>
       <th scope="col">Data</th>
       <th scope="col">Tags</th>
     </tr>
@@ -143,8 +141,8 @@
   $(document).ready(function () {
     $('#status').DataTable({
       "aoColumnDefs": [
-        { "bSortable": false, "aTargets": [0, 7, 8] },
-        { "select": true, "aTargets": [8] },
+        { "bSortable": false, "aTargets": [0, 6, 7] },
+        { "select": true, "aTargets": [7] },
       ],
       searching: true,
       ordering: true,

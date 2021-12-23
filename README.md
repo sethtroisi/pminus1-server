@@ -15,6 +15,11 @@ ln -s ../../misc-scripts/mersenne/status_report/prime95_status.py .
 
 # Download P-1 files from ???
 
+# Link know factors file
+# wget https://www.mersenne.ca/export/mersenneca_known_factors_0G.txt.xz
+# unxz mersenneca_known_factors_0G.txt.xz
+ln -s ~/Downloads/GIMPS/mersenneca_known_factors_0G.txt .
+
 FLASK_APP=app.py FLASK_ENV=development flask run
 ```
 
