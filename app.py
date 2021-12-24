@@ -42,25 +42,34 @@ STATUS_FN = "status.json"
 MAX_COLLECT_N = 10 ** 6
 
 
-def load_factor_count(STOP=1e7):
-    count = defaultdict(int)
+def load_factors(STOP=1e7):
+    total = 0
+    count = defaultdict(list)
     with open(os.path.join(app.root_path, FACTORS_FN)) as f:
         for line in f:
             raw = line.split(",")
-            m = int(raw[0])
+            m, k = int(raw[0]), int(raw[1])
             if m > STOP:
                 break
-            count[m] += 1
+            total += 1
+            count[m].append(k)
 
-    print(f"Loaded {sum(count.values())} factors for {len(count)} exponents")
+    print(f"Loaded {total} factors for {len(count)} exponents")
     return count
 
 
-factor_counts = load_factor_count()
-def add_factors(wu):
-    global factor_counts
+FACTORS = load_factors()
+
+@app.route('/factors/<int:n>')
+def get_factors(n):
+    global FACTORS
+    factors = map(lambda k: str(2*n*k + 1), FACTORS.get(n, []))
+    return f'"{",".join(factors)}"'
+
+def add_factor_count(wu):
+    global FACTORS
     """ Lookup number of factors of n"""
-    wu["factors"] = factor_counts[wu["n"]]
+    wu["num_factors"] = len(FACTORS.get(wu["n"], []))
 
 def add_tags(wu):
     """ Add list of [(tag1, style1), (tag2, style2)]"""
@@ -72,10 +81,10 @@ def add_tags(wu):
             tags.append((f"Under {under}k", "secondary"))
             break
 
-    if wu["factors"] == 0:
+    if wu["num_factors"] == 0:
         tags.append((f"NF", "warning"))
 
-    if wu["factors"] > 5:
+    if wu["num_factors"] > 5:
         tags.append(("MF", "info"))
 
     wu["tags"] = tags
@@ -128,7 +137,7 @@ def main_page():
     B1 = []
     B2 = []
     for wu in status.values():
-        add_factors(wu)
+        add_factor_count(wu)
         add_tags(wu)
 
         exponents.add(wu["number_str"])

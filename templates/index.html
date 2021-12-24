@@ -27,13 +27,18 @@
   </style>
 
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.js"></script>
-  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+{# JQuery #}
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+{# Bootstrap 4 #}
+  <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+
   {% set base="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0" %}
   <link rel="stylesheet" href="{{base}}/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <script src="{{base}}/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
 
-  {# See https://datatables.net/download/ #}
+{# Datatables for sorting rows; See https://datatables.net/download/ #}
   <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.11.3/datatables.min.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.11.3/datatables.min.css"/>
 
@@ -53,7 +58,7 @@
   {%- set raw = d.pop("raw") -%}
   {%- set n = d.pop("n") -%}
   {%- set n_str = d.pop("number_str") -%}
-  {%- set factors = d.pop("factors", 0) -%}
+  {%- set num_factors = d.pop("num_factors", 0) -%}
   {%- set B1 = d.pop("B1_progress", 0) -%}
   {%- set B2 = d.pop("B2_progress", 0) -%}
   {%- set tags = d.pop("tags", []) -%}
@@ -64,16 +69,23 @@
       <th class="pr-4" data-order="{{n}}">
         {{ mersenne_ca_link(n, n_str) if raw['k'] == 1 and raw['c'] == -1 else n_str }}
       </th>
-      <td>{{ factors }}</td>
+      <td>
+        {%- if num_factors -%}
+        <button type="button" class="btn"
+           data-container="body" data-toggle="popover" data-placement="right"
+           onclick="show_factors(this, {{n}})"
+        >{{ num_factors }}</button>
+        {%- else -%}
+        0
+        {%- endif -%}
+      </td>
       <td data-order="{{B1}}">{{ number_comma_or_na(B1) }}</td>
       <td data-order="{{B2}}">{{ number_comma_or_na(B2) }}</td>
       <td class="px-5">TBD</td>
       <td class="px-2">{{ d }}</td>
       <td class="px-2">
       {%- for name, badge_type in tags -%}
-        <span class="badge badge-{{badge_type}}" data-toggle="tooltip" title="{{name}}">
-          {{name}}
-        </span>
+        <span class="badge badge-{{badge_type}}" data-toggle="tooltip" title="{{name}}">{{name}}</span>
         {%- if not loop.last -%}&nbsp;{%- endif -%}
       {%- endfor -%}
       </td>
@@ -137,7 +149,6 @@
 </body>
 
 <script type="text/javascript">
-  // /*
   $(document).ready(function () {
     $('#status').DataTable({
       "aoColumnDefs": [
@@ -149,8 +160,31 @@
       pageLength: 25,
     });
     $('.dataTables_length').addClass('bs-select');
+    // */
+
   });
 
-  // */
+  /** When you click on factors for a row */
+  function show_factors(elem, n) {
+    el = $(elem);
+    if (el.data("content")) {
+      // toggle seems to be broken for first 2 clicks, so track manually
+      el.data("toggled", !el.data("toggled"));
+
+      if (el.data("toggled"))
+        el.popover("show");
+      else
+        el.popover("dispose");
+
+      return;
+    }
+
+    test = $.get("/factors/" + n,
+    function(factors) {
+      el.data("content", factors);
+      el.data("toggled", true);
+      el.popover("show");
+    });
+  }
 </script>
 </html>
