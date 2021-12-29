@@ -109,9 +109,17 @@ def download(filename):
     if filename not in status:
         return f"{filename} not found", 404
 
-    rel_path = status[filename]["path"]
-    print(SERVE_DIR, rel_path)
-    return send_from_directory(directory=SERVE_DIR, filename=rel_path)
+    wu = status[filename]
+    rel_path = wu["path"]
+
+    # Strip trailing hash / .bu from downloaded version
+    dl_name = filename.split(".")[0]
+
+    return send_from_directory(
+        directory=SERVE_DIR,
+        filename=rel_path,
+        as_attachment=True,
+        attachment_filename=dl_name)
 
 
 @app.route("/")

@@ -53,8 +53,9 @@
 {%- endmacro %}
 
 {%- macro status_row(name, data) -%}
-  {# copy so we can pop number_str #}
+  {# copy so we can pop properties #}
   {%- set d = dict(data) -%}
+  {%- set hash_ext = d.get("hash", "") -%} {# get not pop #}
   {%- set raw = d.pop("raw") -%}
   {%- set n = d.pop("n") -%}
   {%- set n_str = d.pop("number_str") -%}
@@ -64,7 +65,7 @@
   {%- set tags = d.pop("tags", []) -%}
     <tr>
       <th class="pr-4" data-order="{{n}}">
-        <a href="{{ url_for("download", filename=name) }}">{{ name }}</a>
+        <a href="{{ url_for("download", filename=name) }}">{{ name.replace(hash_ext, "") }}</a>
       </th>
       <th class="pr-4" data-order="{{n}}">
         {{ mersenne_ca_link(n, n_str) if raw['k'] == 1 and raw['c'] == -1 else n_str }}
@@ -133,8 +134,8 @@
           <tbody>
             <tr>
               <td>{{total_exponents}}</td>
-              <td class="pr-4">{{ "{:.1e}".format(B1_range[0]).replace("+0", "") }} to {{ "{:.1e}".format(B1_range[1]).replace("+0", "") }}
-              <td class="pr-4">{{ "{:.1e}".format(B2_range[0]).replace("+0", "") }} to {{ "{:.1e}".format(B2_range[1]).replace("+", "") }}
+              <td class="pr-4">{{ "{:.1e}".format(B1_range[0]).replace("+0", "") }} to {{ "{:.1e}".format(B1_range[1]).replace("e+", "e") }}
+              <td class="pr-4">{{ "{:.1e}".format(B2_range[0]).replace("+0", "") }} to {{ "{:.1e}".format(B2_range[1]).replace("e+", "e") }}
               <td>TDB</td>
             </tr>
           </tbody>
