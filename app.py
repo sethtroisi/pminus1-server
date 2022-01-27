@@ -16,12 +16,14 @@ limitations under the License.
 
 
 import json
+import re
 import os
 
 from collections import defaultdict
 
 from flask import Flask
-from flask import Response, render_template, send_from_directory
+from flask import request
+from flask import render_template, send_from_directory
 from flask_caching import Cache
 
 import prime95_status
@@ -32,15 +34,20 @@ app = Flask(__name__)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 
-# Result of prime95_status.py <SERVE_DIR> --json status.json --recursive
 SERVE_DIR = "/home/five/Downloads/GIMPS/p95_partials/"
+UPLOAD_DIR = "uploads/"
+
 FACTORS_FN = "mersenneca_known_factors_0G.txt"
+
+# Result of prime95_status.py <SERVE_DIR> --json status.json --recursive
 STATUS_FN = "status.json"
 
+WORKTODO_FMT_RE = re.compile("1,2,(?P<n>[0-9]{3,10}),-1,[0-9]")
+
 # TODO TF, P-1 data from mersenne.ca/export
+MAX_COLLECT_N = 10 ** 7
 
-MAX_COLLECT_N = 10 ** 6
-
+# TODO entries for numbers with lots of factors
 
 def load_factors(STOP=1e7):
     total = 0
@@ -52,7 +59,7 @@ def load_factors(STOP=1e7):
             if m > STOP:
                 break
             total += 1
-            count[m].append(k)
+            count[m].append(2 * m * k + 1)
 
     print(f"Loaded {total} factors for {len(count)} exponents")
     return count
@@ -122,6 +129,34 @@ def download(filename):
         attachment_filename=dl_name)
 
 
+@app.route("/add_factors.html", methods=['GET', 'POST'])
+def add_factors_page():
+    global FACTORS
+    workitems = request.form.get("worktodo-input", "")
+
+    updated = []
+    for line in workitems.split():
+        work_match = WORKTODO_FMT_RE.search(line)
+        if not work_match:
+            continue
+
+        if line.endswith('"'):
+            updated.append(line)
+        else:
+            # Check if list of know factors should be added
+            n = work_match.group("n")
+            factors = ",".join(map(str, sorted(FACTORS.get(int(n)))))
+            if factors:
+                updated.append(f'{line},"{factors}"')
+            else:
+                updated.append(line)
+
+    return render_template(
+        "add_factors.html",
+        original=workitems,
+        transformed="\n".join(updated),
+    )
+
 @app.route("/")
 def main_page():
     status = get_status()
@@ -155,7 +190,6 @@ def main_page():
             b2 = wu.get("B2_progress", None)
             if b2:
                 B2.append(b2)
-
 
 
     return render_template(
