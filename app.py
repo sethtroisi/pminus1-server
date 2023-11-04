@@ -26,7 +26,6 @@ from flask import request
 from flask import render_template, send_from_directory
 from flask_caching import Cache
 
-import prime95_status
 
 print("Setting up P-1 repository controller")
 
@@ -66,6 +65,19 @@ def load_factors(STOP=1e7):
 
 
 FACTORS = load_factors()
+
+def number_str(wu):
+    k,b,n,c = [wu['raw'][k] for k in 'kbnc']
+    temp = "{} ^ {}".format(b, n)
+    if k != 1:
+        temp = f"{k} * {temp}"
+    if c > 0:
+        temp += f" + {c}"
+    else:
+        temp += f" - {-c}"
+    return temp
+
+
 
 @app.route('/factors/<int:n>')
 def get_factors(n):
@@ -168,7 +180,7 @@ def main_page():
             status.pop(name)
             continue
 
-        wu["number_str"] = prime95_status.number_str(wu)
+        wu["number_str"] = number_str(wu)
 
         # These just busy up data
         wu.pop("B1_bound", None)

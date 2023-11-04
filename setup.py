@@ -54,5 +54,7 @@ def create_descriptive_directories(base, n):
             print(inner_path)
             os.mkdir(inner_path)
 
+
+
 if __name__ == "__main__":
     create_descriptive_directories(SERVE_DIR, MAX_N)
