@@ -136,7 +136,7 @@ def download(filename):
 
     return send_from_directory(
         directory=SERVE_DIR,
-        filename=rel_path,
+        path=rel_path,
         as_attachment=True,
         attachment_filename=dl_name)
 
