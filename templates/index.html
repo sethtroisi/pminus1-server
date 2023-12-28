@@ -64,12 +64,12 @@
   {%- set B2 = d.pop("B2_progress", 0) -%}
   {%- set tags = d.pop("tags", []) -%}
     <tr>
-      <th class="pr-4" data-order="{{n}}">
+      <td class="pr-4" data-order="{{n}}">
         <a href="{{ url_for("download", filename=name) }}">{{ name.replace(hash_ext, "") }}</a>
-      </th>
-      <th class="pr-4" data-order="{{n}}">
+      </td>
+      <td class="pr-4" data-order="{{n}}">
         {{ mersenne_ca_link(n, n_str) if raw['k'] == 1 and raw['c'] == -1 else n_str }}
-      </th>
+      </td>
       <td>
         {%- if num_factors -%}
         <button type="button" class="btn"
