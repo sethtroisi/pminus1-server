@@ -124,6 +124,7 @@ def get_status():
 def download(filename):
     # Fine because get_status is cached
     status = get_status()
+    #print("Dowloading", repr(filename), "Present:", filename in status)
 
     if filename not in status:
         return f"{filename} not found", 404
@@ -134,11 +135,15 @@ def download(filename):
     # Strip trailing hash / .bu from downloaded version
     dl_name = filename.split(".")[0]
 
+    # Not really user controlled, but better safe than sorry.
+    partial_path = os.path.join(rel_path, dl_name)
+
+    #print("DL:", SERVE_DIR, partial_path)
+
     return send_from_directory(
         directory=SERVE_DIR,
-        path=rel_path,
-        as_attachment=True,
-        attachment_filename=dl_name)
+        path=partial_path,
+        as_attachment=True)
 
 
 @app.route("/add_factors.html", methods=['GET', 'POST'])
