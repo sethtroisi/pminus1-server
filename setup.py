@@ -21,7 +21,7 @@ import time
 
 # TODO these should maybe live in a config file, be arguments, or ...
 
-SERVE_DIR = "/home/five/Downloads/GIMPS/p95_partials/serving/"
+SERVE_DIR = "/home/once/Downloads/GIMPS/p95_partials/serving/"
 
 MAX_N = 3 * 10 ** 6
 

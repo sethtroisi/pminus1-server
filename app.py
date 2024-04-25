@@ -33,7 +33,7 @@ app = Flask(__name__)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 
-SERVE_DIR = "/home/five/Downloads/GIMPS/p95_partials/"
+SERVE_DIR = "/home/once/Downloads/GIMPS/p95_partials/"
 UPLOAD_DIR = "uploads/"
 
 FACTORS_FN = "mersenneca_known_factors_0G.txt"
